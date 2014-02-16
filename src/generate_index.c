@@ -36,9 +36,9 @@ start:
         switch(state)
         {
                 case TOK_START:
-                        while(!eos(cp) && iswhite(*cp)) 
+                        while(!eos(*cp) && iswhite(*cp)) 
                                 cp++;
-                        if ( eos(cp) )
+                        if ( eos(*cp) )
                                 return NULL;
                         else if ( iskeyword(*cp))
                                 state = TOK_KEYWORD;
@@ -46,11 +46,11 @@ start:
                                 state = TOK_IGNORE;
                         break;
                 case TOK_IGNORE:
-                        while(!eos(cp) && !iskeyword(*cp))
+                        while(!eos(*cp) && !iskeyword(*cp))
                                 cp++;
-                        if ( eos(cp) ) 
+                        if ( eos(*cp) ) 
                                 return NULL;
-                        state = TOK_START; 
+                        state = TOK_KEYWORD; 
                         break;
                 case TOK_KEYWORD:
                         line=cp;
@@ -60,15 +60,6 @@ start:
                         }
                         *cp='\0';
                         return line;
-      #if 0
-                        if (eos(cp) || iswhite(*cp)) 
-                        {
-                                *cp='\0';
-                                return line;
-                        }
-                        else
-                                state=TOK_START;
-#endif
         }
         goto start;
 }
@@ -76,23 +67,21 @@ char*  tokenize_line(char* line)
 {
         static char* in_s,*end_s;
         char* cp=NULL;
-        int state = TOK_START;
 
         if ( line )
         {
                 in_s = line;
                 end_s = in_s+strlen(line);
         } 
-        /* eat all the spaces */
+
         cp=get_next_keyword(in_s); 
-        /* advance to the next keyword*/
-        if ( cp )
+
+        if ( cp && *cp != '\0' )
         {
-                in_s += strlen(cp) + 1;
-                if ( in_s >= end_s )
-                        cp = NULL;
+                in_s += strlen(in_s) + 1;
         }
-        
+        else if ( cp && *cp == '\0')
+                return NULL; 
         return cp;
 }
 
